@@ -29,16 +29,20 @@
                 <input type="text" id="firstName" name="firstName" required placeholder="Иван">
             </div>
             <div class="form-group">
-                <label for="lastName">Фамилия:</label>
-                <input type="text" id="lastName" name="lastName" required placeholder="Иванов">
-            </div>
-            <div class="form-group">
                 <label for="phone">Телефон:</label>
                 <input type="tel" id="phone" name="phone" placeholder="+79261234567">
             </div>
             <div class="form-group">
+                <label for="telegram">Telegram (никнейм, например @username):</label>
+                <input type="text" id="telegram" name="telegram" placeholder="@username">
+            </div>
+            <div class="form-group">
                 <label for="city">Город:</label>
                 <input type="text" id="city" name="city" placeholder="Москва">
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="whatsapp" name="whatsapp" value="true">
+                <label for="whatsapp" style="display: inline; font-weight: normal;"> Есть Whatsapp по указанному номеру телефона</label>
             </div>
             
             <button type="submit" id="submit-button">Зарегистрироваться</button>
