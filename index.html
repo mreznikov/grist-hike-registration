@@ -1,1 +1,19 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация на поход</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Регистрация на поход</h1>
+    <div id="loading-hikes">Загрузка доступных походов...</div>
+    <form id="registration-form">
+        <div>
+            <label for="hike">Выберите поход:</label>
+            <select id="hike" name="hike" required></select>
+        </div>
+        <h2>Ваши данные:</h2>
+        <div>
+            <label for="email">Email:</label>
