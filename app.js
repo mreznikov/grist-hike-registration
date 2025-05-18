@@ -2,37 +2,37 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- НАСТРОЙКИ ---
-    // ВНИМАНИЕ: Этот URL должен быть доступен из браузера пользователя, который открывает GitHub Page.
-    // Если Grist работает только в вашей локальной сети и не доступен извне, это не сработает.
-    const gristBaseUrl = 'http://18.153.125.52:8484'; // Ваш базовый URL Grist
-    const docId = 'oHEUL5eSRBwJ'; // Ваш ID Документа Grist
+    const gristBaseUrl = 'http://18.153.125.52:8484'; 
+    const docId = 'oHEUL5eSRBwJ'; 
     
     // ВНИМАНИЕ: ХРАНЕНИЕ API-КЛЮЧА В КЛИЕНТСКОМ JAVASCRIPT НЕБЕЗОПАСНО ДЛЯ ПРОДАКТИВА!
-    // Этот ключ будет виден любому, кто откроет исходный код страницы.
-    // Для реального использования рассмотрите бэкенд-прокси.
     const apiKey = 'd5f1402069843ddf8f04e54ce7efb93818ff2f80'; 
 
-    // ID таблиц в Grist (замените на ваши реальные ID таблиц, если они отличаются)
-    // ID таблицы - это то, что вы видите в URL, когда открываете таблицу, или в настройках таблицы.
-    const hikesTableApiId = 'Походы';       // API ID таблицы с походами
-    const participantsTableApiId = 'Участники'; // API ID таблицы с участниками
-    const registrationsTableApiId = 'Регистрации_на_Походы'; // API ID таблицы регистраций
+    // ID таблиц в Grist
+    const hikesTableApiId = 'Table2';       
+    const participantsTableApiId = 'Table7'; 
+    const registrationsTableApiId = 'Table10';
 
-    // Имена колонок (Column ID) в ваших таблицах Grist (замените на ваши реальные ID колонок)
-    const hikeNameCol = 'Название_Похода'; // Колонка с названием похода в таблице "Походы"
-    const hikeDateCol = 'Дата_Похода';     // Колонка с датой похода в таблице "Походы"
-    const hikeStatusCol = 'Статус_Похода'; // Колонка со статусом похода в таблице "Походы"
-    const hikeStatusOpenValue = 'Регистрация открыта'; // Значение статуса для доступных походов
+    // Имена колонок (Column ID) в ваших таблицах Grist
+    // Таблица Походов (Table2)
+    const hikeNameCol = 'F'; 
+    const hikeDateCol = 'A';     
+    const hikeStatusCol = 'D'; 
+    const hikeStatusOpenValue = "1. Планирование"; // Точное значение статуса
 
+    // Таблица Участников (Table7)
     const participantEmailCol = 'Email';
-    const participantFirstNameCol = 'Имя';
-    const participantLastNameCol = 'Фамилия';
-    const participantPhoneCol = 'Телефон';
-    const participantCityCol = 'Город';
+    const participantFirstNameCol = 'Name';
+    // Фамилия не нужна
+    const participantPhoneCol = 'Telephone';
+    const participantTelegramCol = 'Telegram'; // Новая колонка
+    const participantWhatsappCol = 'Whatsapp'; // Новая колонка (Boolean)
+    const participantCityCol = 'Town';
 
-    const registrationHikeRefCol = 'ID_Похода_Ref';     // Колонка Reference на Походы в таблице Регистраций
-    const registrationParticipantRefCol = 'ID_Участника_Ref'; // Колонка Reference на Участники в таблице Регистраций
-    // --- КОНЕЦ НАСТРОЕК ---
+    // Таблица Регистраций (Table10)
+    const registrationHikeRefCol = 'A';     
+    const registrationParticipantRefCol = 'B'; 
+    // --- КОНЕЦ НАСТРОЕK ---
 
     const hikeSelect = document.getElementById('hike');
     const registrationForm = document.getElementById('registration-form');
@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingHikesDiv = document.getElementById('loading-hikes');
     const submitButton = document.getElementById('submit-button');
 
-    // Функция для выполнения запросов к Grist API
     async function gristRequest(endpoint, method = 'GET', body = null) {
         const headers = {
             'Authorization': `Bearer ${apiKey}`,
@@ -67,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Ошибка Grist API:', response.status, errorData);
                 throw new Error(`Ошибка Grist API: ${response.status} - ${errorData.error || JSON.stringify(errorData)}`);
             }
-            if (response.status === 204) { // No Content
+            if (response.status === 204) { 
                 return { success: true };
             }
             return await response.json();
@@ -79,11 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 1. Загрузка списка походов
     async function loadHikes() {
         try {
             const filter = {};
-            filter[hikeStatusCol] = [hikeStatusOpenValue]; // Фильтр по статусу
+            filter[hikeStatusCol] = [hikeStatusOpenValue]; 
             const encodedFilter = encodeURIComponent(JSON.stringify(filter));
             
             const data = await gristRequest(`tables/${hikesTableApiId}/records?filter=${encodedFilter}`);
@@ -92,10 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
             registrationForm.style.display = 'block';
 
             if (data && data.records && data.records.length > 0) {
-                hikeSelect.innerHTML = '<option value="">-- Выберите поход --</option>'; // Placeholder
+                hikeSelect.innerHTML = '<option value="">-- Выберите поход --</option>';
                 data.records.forEach(record => {
                     const option = document.createElement('option');
-                    option.value = record.id; // ID строки похода (Grist row ID)
+                    option.value = record.id; 
                     option.textContent = `${record.fields[hikeNameCol] || 'Поход без названия'} (${record.fields[hikeDateCol] || 'Дата не указана'})`;
                     hikeSelect.appendChild(option);
                 });
@@ -110,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Обработка отправки формы
     registrationForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         messageArea.textContent = 'Обработка регистрации...';
@@ -120,9 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(registrationForm);
         const email = formData.get('email').trim();
         const firstName = formData.get('firstName').trim();
-        const lastName = formData.get('lastName').trim();
         const phone = formData.get('phone').trim();
+        const telegram = formData.get('telegram').trim(); // Новое поле
         const city = formData.get('city').trim();
+        const whatsapp = formData.get('whatsapp') === 'true'; // Чекбокс вернет 'true' или null
         const selectedHikeRowId = parseInt(hikeSelect.value, 10);
 
         if (!selectedHikeRowId) {
@@ -133,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Шаг 2.1: Найти или создать участника
             let participantRowId;
             const participantFilter = {};
             participantFilter[participantEmailCol] = [email];
@@ -141,38 +138,30 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const existingParticipants = await gristRequest(`tables/${participantsTableApiId}/records?filter=${encodedParticipantFilter}`);
 
+            const participantFields = {
+                [participantFirstNameCol]: firstName,
+                [participantPhoneCol]: phone,
+                [participantTelegramCol]: telegram,
+                [participantWhatsappCol]: whatsapp,
+                [participantCityCol]: city
+            };
+
             if (existingParticipants && existingParticipants.records && existingParticipants.records.length > 0) {
                 participantRowId = existingParticipants.records[0].id;
                 console.log(`Найден существующий участник с ID: ${participantRowId}`);
-                // Опционально: обновить данные участника
                 await gristRequest(`tables/${participantsTableApiId}/records`, 'PATCH', {
-                    records: [{
-                        id: participantRowId,
-                        fields: {
-                            [participantFirstNameCol]: firstName,
-                            [participantLastNameCol]: lastName,
-                            [participantPhoneCol]: phone,
-                            [participantCityCol]: city
-                        }
-                    }]
+                    records: [{ id: participantRowId, fields: participantFields }]
                 });
                 messageArea.textContent = 'Данные участника обновлены. ';
             } else {
                 console.log(`Участник с email ${email} не найден, создаем нового.`);
-                const newParticipantPayload = {
-                    records: [{
-                        fields: {
-                            [participantEmailCol]: email,
-                            [participantFirstNameCol]: firstName,
-                            [participantLastNameCol]: lastName,
-                            [participantPhoneCol]: phone,
-                            [participantCityCol]: city
-                        }
-                    }]
-                };
-                const newParticipantData = await gristRequest(`tables/${participantsTableApiId}/records`, 'POST', newParticipantPayload);
+                const newParticipantPayloadFields = { ...participantFields }; // Копируем поля
+                newParticipantPayloadFields[participantEmailCol] = email; // Добавляем Email для нового участника
+
+                const newParticipantData = await gristRequest(`tables/${participantsTableApiId}/records`, 'POST', {
+                    records: [{ fields: newParticipantPayloadFields }]
+                });
                 
-                // Ответ Grist на POST /records может быть { "records": [{ "id": NEW_ROW_ID }] } или просто [NEW_ROW_ID]
                 if (newParticipantData && newParticipantData.records && newParticipantData.records.length > 0 && newParticipantData.records[0].id) {
                     participantRowId = newParticipantData.records[0].id;
                 } else if (Array.isArray(newParticipantData) && newParticipantData.length > 0 && typeof newParticipantData[0] === 'number') { 
@@ -185,10 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageArea.textContent = 'Профиль участника создан. ';
             }
 
-            // Шаг 2.2: Зарегистрировать участника на поход
             const registrationFilter = {};
             registrationFilter[registrationHikeRefCol] = [selectedHikeRowId];
-            registrationFilter[registrationParticipantRefCol] = [participantRowId]; // Для Reference колонок значением должен быть ID строки
+            registrationFilter[registrationParticipantRefCol] = [participantRowId]; 
             const encodedRegFilter = encodeURIComponent(JSON.stringify(registrationFilter));
 
             const existingRegistrations = await gristRequest(`tables/${registrationsTableApiId}/records?filter=${encodedRegFilter}`);
@@ -212,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         } catch (error) {
-            // Ошибка уже должна быть отображена gristRequest функцией или здесь
             messageArea.textContent = `Ошибка регистрации: ${error.message}`;
             messageArea.className = 'message error';
             console.error('Registration process failed:', error);
@@ -221,7 +208,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Инициализация
     loadHikes();
 });
-
